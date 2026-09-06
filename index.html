@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RaceTimeFlow.NET — časomíra Skiklubu Chlum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #f5f6f8;
+    --ink: #12161d;
+    --blue: #0f52d4;
+    --blue-deep: #0d3fa0;
+    --red: #d8404b;
+    --graphite: #5b6470;
+    --hairline: #dde1e7;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Barlow Condensed', sans-serif;
+    letter-spacing:-0.01em;
+    line-height:1.05;
+    font-weight:700;
+  }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  .wrap{ max-width:1120px; margin:0 auto; padding-left:20px; padding-right:20px; }
+  @media(min-width:480px){ .wrap{ padding-left:24px; padding-right:24px; } }
+  @media(min-width:768px){ .wrap{ padding-left:56px; padding-right:56px; } }
+
+  /* header */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(245,246,248,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--hairline);
+  }
+  .header-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 20px; max-width:1120px; margin:0 auto; }
+  @media(min-width:480px){ .header-inner{ padding:16px 24px; } }
+  @media(min-width:768px){ .header-inner{ padding:16px 56px; } }
+  .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; }
+  .brand svg{ display:block; }
+  .brand-name{ font-family:'Barlow Condensed', sans-serif; font-weight:700; font-size:22px; letter-spacing:-0.01em; }
+  .brand-name span{ color:var(--red); }
+  nav{ display:none; gap:28px; align-items:center; }
+  @media(min-width:860px){ nav{ display:flex; } }
+  nav a{ color:var(--graphite); text-decoration:none; font-size:14.5px; font-weight:500; }
+  nav a:hover{ color:var(--ink); }
+  .btn-live{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--blue); color:#fff; text-decoration:none;
+    font-weight:600; font-size:14.5px; padding:10px 18px; border-radius:7px;
+    box-shadow:0 1px 0 rgba(0,0,0,0.06);
+  }
+  .btn-live:hover{ background:var(--blue-deep); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--red); display:inline-block; }
+
+  /* hero */
+  .hero{ padding:40px 0 44px; }
+  @media(min-width:640px){ .hero{ padding:64px 0 56px; } }
+  @media(min-width:900px){ .hero{ padding:96px 0 80px; } }
+  .hero-grid{ display:grid; grid-template-columns:1fr; gap:48px; align-items:center; }
+  @media(min-width:900px){ .hero-grid{ grid-template-columns:1.05fr 0.95fr; gap:40px; } }
+  .byline{
+    display:flex; align-items:center; gap:10px; margin-bottom:20px;
+    color:var(--graphite); font-size:14px;
+  }
+  .byline .rule{ width:26px; height:1px; background:var(--hairline); display:inline-block; }
+  h1.hero-title{ font-size:clamp(32px, 9vw, 56px); color:var(--ink); margin:0 0 18px; max-width:15ch; }
+  .hero-sub{ color:var(--graphite); font-size:16px; line-height:1.6; max-width:46ch; margin:0 0 26px; }
+  @media(min-width:640px){ .hero-sub{ font-size:17px; } }
+  .stat-line{
+    display:flex; flex-wrap:wrap; gap:10px 22px; margin-bottom:32px;
+    font-family:'IBM Plex Mono', monospace; font-size:13.5px; color:var(--ink);
+  }
+  .stat-line b{ font-weight:600; }
+  .stat-line .sep{ color:var(--hairline); }
+  .cta-row{ display:flex; flex-wrap:wrap; align-items:center; gap:20px; }
+  .link-quiet{ color:var(--ink); font-weight:500; font-size:14.5px; text-decoration:underline; text-decoration-color:var(--hairline); text-underline-offset:4px; }
+  .link-quiet:hover{ text-decoration-color:var(--ink); }
+
+  /* phone mock */
+  .phone-wrap{ display:flex; flex-direction:column; align-items:center; }
+  .phone{
+    width:100%; max-width:260px;
+    border:1px solid var(--hairline);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 16px 32px -18px rgba(23,32,25,0.3);
+    transform:none;
+    background:#fff;
+  }
+  @media(min-width:640px){
+    .phone{ max-width:300px; border-radius:20px; box-shadow:0 24px 48px -20px rgba(23,32,25,0.28); transform:rotate(1.2deg); }
+  }
+  .phone img{ display:block; width:100%; height:auto; }
+  .phone-caption{
+    margin-top:18px; font-family:'IBM Plex Mono', monospace; font-size:12.5px;
+    color:var(--graphite); text-align:center; max-width:280px;
+  }
+
+  /* section shared */
+  section{ padding:44px 0; }
+  @media(min-width:640px){ section{ padding:64px 0; } }
+  .section-head{ max-width:56ch; margin-bottom:40px; }
+  .section-head h2{ font-size:clamp(26px, 6vw, 34px); color:var(--ink); margin:0 0 12px; }
+  .section-head p{ color:var(--graphite); font-size:15.5px; line-height:1.6; margin:0; }
+  @media(min-width:640px){ .section-head p{ font-size:16px; } }
+
+  /* feature list */
+  .feature-list{ border-top:1px solid var(--hairline); }
+  .feature-row{
+    display:block;
+    padding:20px 0; border-bottom:1px solid var(--hairline);
+  }
+  @media(min-width:700px){
+    .feature-row{ display:grid; grid-template-columns:220px 1fr; gap:32px; padding:26px 0; align-items:start; }
+  }
+  .feature-row h3{ font-size:19px; margin:0; color:var(--ink); font-weight:600; font-family:'Inter',sans-serif; letter-spacing:0; }
+  @media(min-width:640px){ .feature-row h3{ font-size:21px; } }
+  .feature-icon{ width:26px; height:26px; color:var(--blue); flex-shrink:0; }
+  @media(min-width:640px){ .feature-icon{ width:34px; height:34px; } }
+  .feature-row p{ color:var(--graphite); font-size:14.5px; line-height:1.65; margin:8px 0 0; max-width:56ch; }
+  @media(min-width:640px){ .feature-row p{ font-size:15px; } }
+  .feature-title-row{ display:flex; align-items:center; gap:10px; }
+
+  /* about band */
+  .about{ background:var(--ink); color:var(--paper); }
+  .about-grid{ display:grid; grid-template-columns:1fr; gap:28px; align-items:center; }
+  @media(min-width:800px){ .about-grid{ grid-template-columns:180px 1fr; gap:52px; } }
+  .about-grid img{ width:104px; height:104px; display:block; margin:0 auto; }
+  @media(min-width:800px){ .about-grid img{ width:150px; height:150px; margin:0; } }
+  .about h2{ color:#fff; font-size:clamp(24px, 6vw, 30px); margin:0 0 14px; text-align:center; }
+  @media(min-width:800px){ .about h2{ text-align:left; } }
+  .about p{ color:#c7cfc8; font-size:15.5px; line-height:1.7; max-width:62ch; margin:0 0 14px; text-align:center; }
+  @media(min-width:800px){ .about p{ font-size:16.5px; text-align:left; } }
+  .about p:last-child{ margin-bottom:0; }
+  .about strong{ color:#fff; font-weight:600; }
+
+  /* footer */
+  footer{ border-top:1px solid var(--hairline); padding:40px 0; }
+  .footer-inner{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:16px 20px; text-align:center; }
+  @media(min-width:640px){ .footer-inner{ justify-content:space-between; text-align:left; } }
+  .footer-brand{ display:flex; align-items:center; gap:10px; color:var(--graphite); font-size:13.5px; }
+  .footer-brand img{ width:26px; height:26px; }
+  .footer-links{ display:flex; gap:20px; align-items:center; }
+  .footer-links a{ color:var(--graphite); font-size:14px; text-decoration:none; font-weight:500; }
+  .footer-links a:hover{ color:var(--ink); }
+  .footer-note{ color:#96a099; font-size:12.5px; margin-top:24px; line-height:1.6; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="brand" href="#top">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="9.5" y="1.4" width="5" height="1.8" rx="0.6" fill="#0f52d4"/>
+        <line x1="16.2" y1="3.4" x2="17.6" y2="4.8" stroke="#0f52d4" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="12" cy="13.5" r="8.2" stroke="#0f52d4" stroke-width="2"/>
+        <path d="M12 9.2v4.3l3 2" stroke="#0f52d4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-name">RaceTimeFlow<span>.NET</span></span>
+    </a>
+    <nav>
+      <a href="#co-umime">Co umíme</a>
+      <a href="#o-nas">O nás</a>
+    </nav>
+    <a class="btn-live" href="https://live.racetimeflow.net" target="_blank" rel="noopener">
+      <span class="dot"></span> Live výsledky
+    </a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="byline"><span class="rule"></span> Skiklub Chlum · časomíra postavená svépomocí</div>
+        <h1 class="hero-title">Vlastní systém časomíry pro lyžařské závody</h1>
+        <p class="hero-sub">Software na měření času píšeme a provozujeme sami, propojený s časomírou a fotobuňkami ALGE-TIMING. Výsledky se objevují v cíli i online v momentě, kdy závodník projede.</p>
+        <div class="stat-line">
+          <span><b>169</b> závodníků</span>
+          <span class="sep">·</span>
+          <span>slalom <b>28. 2. 2026</b></span>
+          <span class="sep">·</span>
+          <span>hardware <b>ALGE-TIMING</b></span>
+        </div>
+        <div class="cta-row">
+          <a class="btn-live" href="https://live.racetimeflow.net" target="_blank" rel="noopener">
+            <span class="dot"></span> Otevřít live výsledky
+          </a>
+          <a class="link-quiet" href="#co-umime">Co systém umí</a>
+        </div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone">
+          <img src="images/live-vysledky.jpg" alt="Snímek obrazovky živých výsledků na live.racetimeflow.net – slalom 28. 2. 2026, 169 závodníků">
+        </div>
+        <p class="phone-caption">live.racetimeflow.net — reálný snímek z posledního závodu</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CO UMÍME -->
+  <section id="co-umime">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Co systém reálně dělá</h2>
+        <p>Čtyři věci, které software při závodech skutečně používáme.</p>
+      </div>
+      <div class="feature-list">
+
+        <div class="feature-row">
+          <div class="feature-title-row">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12h4l2-7 4 14 2-7h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <h3>ALGE-TIMING integrace</h3>
+          </div>
+          <p>Software čte impulzy přímo z časomíry a fotobuněk ALGE-TIMING, kterou klub na trati používá — bez ručního přepisování časů.</p>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-title-row">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <h3>Live výsledky online</h3>
+          </div>
+          <p>Průběžné pořadí je vidět na <a class="link-quiet" href="https://live.racetimeflow.net" target="_blank" rel="noopener">live.racetimeflow.net</a> hned po dojezdu — funguje na mobilu i na velké obrazovce v cíli.</p>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-title-row">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/><path d="M14 3v4h4" stroke="currentColor" stroke-width="1.6"/></svg>
+            <h3>Export do PDF a Excelu</h3>
+          </div>
+          <p>Výsledkovou listinu vygenerujeme hotovou k tisku nebo dalšímu zpracování během pár minut po posledním závodníkovi.</p>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-title-row">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 20h6M12 17v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <h3>Ovládání LED tabule</h3>
+          </div>
+          <p>Startovní a cílová tabule se aktualizuje spolu s naměřenými časy, takže se nic nepřepisuje ručně na místě.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- O NÁS -->
+  <section class="about" id="o-nas">
+    <div class="wrap about-grid">
+      <img src="images/logo-skiklub-chlum.png" alt="Logo Skiklubu Chlum, založeno 2003">
+      <div>
+        <h2>Dva lidi, jeden klub, jedna časomíra</h2>
+        <p><strong>RaceTimeFlow.NET</strong> stavíme a provozujeme jako dobrovolníci ze Skiklubu Chlum, který závodí od roku 2003. Není to firma s podporou 24/7 — je to software, kterým měříme svoje vlastní závody, protože nás to baví a chtěli jsme mít výsledky online hned, ne až druhý den.</p>
+        <p>Pokud řešíte vlastní časomíru na klubové úrovni a zajímá vás, jak to máme postavené, ozvěte se přes klub — rádi se podělíme o zkušenost.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="images/logo-skiklub-chlum.png" alt="Skiklub Chlum">
+        <span>Skiklub Chlum · závodní lyžování od 2003</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://live.racetimeflow.net" target="_blank" rel="noopener">Live výsledky</a>
+        <a href="#o-nas">O nás</a>
+      </div>
+    </div>
+    <p class="footer-note">RaceTimeFlow.NET je hobby projekt Skiklubu Chlum, není komerční produkt. ALGE-TIMING je registrovaná ochranná známka společnosti ALGE-TIMING GmbH; RaceTimeFlow.NET s ní není nijak obchodně spojen, pouze její hardware používá při měření.</p>
+  </div>
+</footer>
+
+</body>
+</html>
